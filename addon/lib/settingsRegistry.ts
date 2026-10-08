@@ -2469,6 +2469,16 @@ export const SETTINGS_REGISTRY: SettingDefinition[] = [
     default: 6 * 60 * 60,
   },
   {
+    key: 'NO_JIKAN',
+    envVar: 'NO_JIKAN',
+    envOnly: true,
+    label: 'Disable Jikan',
+    description: 'Reject Jikan requests and disable MAL metadata fallback, rating enrichment, and genre links',
+    category: 'Providers',
+    type: 'boolean',
+    default: false,
+  },
+  {
     key: 'JIKAN_API_BASE',
     envVar: 'JIKAN_API_BASE',
     label: 'Jikan API Base URL',

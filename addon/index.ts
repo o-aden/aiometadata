@@ -2275,6 +2275,7 @@ addon.get("/api/mal/discover/reference", async (req, res) => {
 
 // GET /api/mal/discover/search/producer - Search MAL studios/producers by name
 addon.get("/api/mal/discover/search/producer", async (req, res) => {
+  if (jikan.isJikanDisabled()) return res.status(403).json({ error: "Jikan is disabled by NO_JIKAN" });
   try {
     const query = req.query.query.trim();
     if (!query) {

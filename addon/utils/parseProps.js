@@ -1095,6 +1095,8 @@ function parseShareLink(title, imdb_id, type) {
 }
 
 function parseAnimeGenreLink(genres, type, userUUID) {
+  // Metadata still carries its genre labels; only MAL Discover links are suppressed.
+  if (jikan.isJikanDisabled()) return [];
   if (!Array.isArray(genres) || !process.env.HOST_NAME) return [];
   
   const host = process.env.HOST_NAME.startsWith('http')

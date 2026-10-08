@@ -233,7 +233,7 @@ export async function resolveEntities(catalog: AICatalogOutput, ctx: ResolveCont
     }
   }
 
-  if (catalog.source === 'mal' && resolve.producers?.length) {
+  if (catalog.source === 'mal' && resolve.producers?.length && !require('../lib/mal').isJikanDisabled()) {
     const JIKAN_API_BASE = process.env.JIKAN_API_BASE || 'https://api.jikan.moe/v4';
     const items: Array<{ id: number; label: string }> = [];
     for (const name of resolve.producers) {

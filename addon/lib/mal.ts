@@ -12,6 +12,17 @@ const {
   normalizeJikanCatalogForCache,
 }: any = require('./jikanCacheNormalizers');
 
+// Read per operation so no-Jikan mode also protects already loaded modules.
+function isJikanDisabled(): boolean {
+  return process.env.NO_JIKAN === 'true';
+}
+
+function assertJikanEnabled(): void {
+  if (isJikanDisabled()) {
+    throw Object.assign(new Error('Jikan is disabled by NO_JIKAN'), { code: 'JIKAN_DISABLED' });
+  }
+}
+
 function jikanApiBase(): string {
   return process.env.JIKAN_API_BASE || 'https://api.jikan.moe/v4';
 }
@@ -284,6 +295,9 @@ async function processRequest(requestTask: RequestTask): Promise<void> {
 }
 
 function enqueueRequest(task: () => Promise<any>, url: string): Promise<any> {
+  if (isJikanDisabled()) {
+    return Promise.reject(Object.assign(new Error('Jikan is disabled by NO_JIKAN'), { code: 'JIKAN_DISABLED' }));
+  }
   return new Promise((resolve, reject) => {
     requestQueue.push({ resolve, reject, task, url, retries: 0 });
     if (!isProcessing) {
@@ -293,6 +307,7 @@ function enqueueRequest(task: () => Promise<any>, url: string): Promise<any> {
 }
 
 async function _makeJikanRequest(url: string): Promise<any> {
+  assertJikanEnabled();
   const etagKey = `mal_etag:${url}`;
 
   let etag: string | null = null;
@@ -305,6 +320,7 @@ async function _makeJikanRequest(url: string): Promise<any> {
     headers['If-None-Match'] = etag;
   }
 
+  assertJikanEnabled();
   const response = await httpGet(url, {
       dispatcher: malDispatcher,
       headers: headers,
@@ -321,6 +337,7 @@ async function _makeJikanRequest(url: string): Promise<any> {
            }
        }
        logger.warn(`[304] ETag match but body missing for ${url}. Re-fetching without ETag...`);
+       assertJikanEnabled();
        return httpGet(url, { dispatcher: malDispatcher, timeout: 15000, headers: {} });
   }
 
@@ -883,6 +900,7 @@ async function fetchDiscover(params: Record<string, any> = {}, page: number = 1)
 }
 
 export {
+  isJikanDisabled,
   malPageSize,
   searchAnime,
   getAnimeDetails,
@@ -907,6 +925,7 @@ export {
   fetchDiscover,
 };
 module.exports = {
+  isJikanDisabled,
   malPageSize,
   searchAnime,
   getAnimeDetails,

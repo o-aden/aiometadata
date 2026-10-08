@@ -1112,7 +1112,7 @@ async function getAnimeMeta(preferredProvider, stremioId, language, config, user
   }
 
   // 2. Try MAL (if it's the preferred provider OR as the final fallback)
-  if (allIds?.malId) {
+  if (!jikan.isJikanDisabled() && allIds?.malId) {
     try {
       logger.debug(`[AnimeMeta] Using provider 'mal' for ${stremioId}`);
       const [details, characters, episodes] = await Promise.all([
@@ -3310,7 +3310,7 @@ async function buildKitsuAnimeResponse(stremioId, kitsuData, genres, includeObje
     // Kitsu leaves ageRating empty on most recent seasonal anime; MAL rates them.
     let kitsuCertification = kitsuData.attributes.ageRating || null;
     const certMalId = malId || (String(stremioId).startsWith('mal:') ? String(stremioId).slice(4) : null);
-    if (!kitsuCertification && certMalId) {
+    if (!jikan.isJikanDisabled() && !kitsuCertification && certMalId) {
       try {
         const malDetails = await cacheWrapJikanApi(`anime-details-${certMalId}`, () => jikan.getAnimeDetails(certMalId), null);
         kitsuCertification = Utils.malRatingToCertification(malDetails?.rating) || null;
